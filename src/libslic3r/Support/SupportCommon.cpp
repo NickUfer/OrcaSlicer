@@ -1435,7 +1435,7 @@ SupportGeneratorLayersPtr generate_support_layers(
             height_min = std::min(height_min, layer.height);
         }
         if (! empty) {
-            // Here the upper_layer and lower_layer pointers are left to null at the support layers, 
+            // Here the upper_layer and lower_layer pointers are left to null at the support layers,
             // as they are never used. These pointers are candidates for removal.
             bool   this_layer_contacts_only = num_top_contacts > 0 && num_top_contacts == num_interfaces;
             size_t this_layer_id_interface  = layer_id_interface;
@@ -1449,7 +1449,7 @@ SupportGeneratorLayersPtr generate_support_layers(
                     }
             }
             object.add_support_layer(layer_id ++, this_layer_id_interface, height_min, zavg);
-            if (num_interfaces && ! this_layer_contacts_only)
+            //if (num_interfaces && ! this_layer_contacts_only)
                 ++ layer_id_interface;
         }
         i = j;

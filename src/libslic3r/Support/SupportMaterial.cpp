@@ -3427,7 +3427,7 @@ std::pair<SupportGeneratorLayersPtr, SupportGeneratorLayersPtr> PrintObjectSuppo
     bool   snug_supports                 = m_object_config->support_style.value == smsSnug;
     // BBS: if support interface and support base do not use the same filament, add a base layer to improve their adhesion
     bool differnt_support_interface_filament = m_object_config->support_interface_filament.value != m_object_config->support_filament.value;
-    int num_base_interface_layers_top = differnt_support_interface_filament ? 1 : 0;
+    int num_base_interface_layers_top = differnt_support_interface_filament ? 3 : 0;
     int num_base_interface_layers_bottom = differnt_support_interface_filament ? 1 : 0;
     int num_interface_layers_top = m_object_config->support_interface_top_layers + num_base_interface_layers_top;
     int num_interface_layers_bottom = m_object_config->support_interface_bottom_layers + num_base_interface_layers_bottom;
@@ -4414,9 +4414,7 @@ void PrintObjectSupportMaterial::generate_toolpaths(
         {
             SupportLayer &support_layer = *support_layers[support_layer_id];
             LayerCache   &layer_cache   = layer_caches[support_layer_id];
-            float         interface_angle_delta = m_object_config->support_style.value == smsSnug ? 
-                (support_layer.interface_id() & 1) ? float(- M_PI / 4.) : float(+ M_PI / 4.) :
-                0;
+            float         interface_angle_delta = (support_layer.interface_id() & 1) ? float(- M_PI / 4.) : float(+ M_PI / 4.);
 
             // Find polygons with the same print_z.
             MyLayerExtruded &bottom_contact_layer = layer_cache.bottom_contact_layer;
