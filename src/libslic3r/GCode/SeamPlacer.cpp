@@ -1245,6 +1245,8 @@ void SeamPlacer::align_seam_points(const PrintObject *po, const SeamPlacerImpl::
   }
 #endif
 
+  SeamPosition configured_seam_preference = po->config().seam_position.value;
+
   //gather vector of all seams on the print_object - pair of layer_index and seam__index within that layer
   const std::vector<PrintObjectSeamData::LayerSeams> &layers = m_seam_per_object[po].layers;
   std::vector<std::pair<size_t, size_t>> seams;
@@ -1283,6 +1285,9 @@ void SeamPlacer::align_seam_points(const PrintObject *po, const SeamPlacerImpl::
     if (layer_perimeter_points[seam_index].perimeter.finalized) {
       // This perimeter is already aligned, skip seam
       continue;
+    } else if (configured_seam_preference == spRandom && layer_perimeter_points[seam_index].type != EnforcedBlockedSeamPoint::Enforced) {
+        // If random and not influenced by enforcer, skip seam
+        continue;
     } else {
       seam_string = this->find_seam_string(po, { layer_idx, seam_index }, comparator);
       size_t step_size = 1 + seam_string.size() / 20;
@@ -1465,8 +1470,8 @@ void SeamPlacer::init(const Print &print, std::function<void(void)> throw_if_can
 
                               if (configured_seam_preference == spRandom) {
                                 bool hasEnforced = std::any_of(
-                                  perimeter_points.begin(),
-                                  perimeter_points.end(),
+                                  layer_perimeter_points.begin(),
+                                  layer_perimeter_points.end(),
                                   [](const SeamCandidate& candidate) {
                                       return candidate.type == EnforcedBlockedSeamPoint::Enforced;
                                   }
@@ -1485,7 +1490,7 @@ void SeamPlacer::init(const Print &print, std::function<void(void)> throw_if_can
           << "SeamPlacer: pick_seam_point : end";
     }
     throw_if_canceled_func();
-    if (configured_seam_preference == spAligned || configured_seam_preference == spRear) {
+    if (configured_seam_preference == spAligned || configured_seam_preference == spRear || configured_seam_preference == spRandom) {
       BOOST_LOG_TRIVIAL(debug)
           << "SeamPlacer: align_seam_points : start";
       align_seam_points(po, comparator);
