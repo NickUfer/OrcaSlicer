@@ -741,7 +741,7 @@ struct SeamComparator {
   // should return if a is better seamCandidate than b
   bool is_first_better(const SeamCandidate &a, const SeamCandidate &b, const Vec2f &preffered_location = Vec2f { 0.0f,
                                                                                                                0.0f }) const {
-    if (setup == SeamPosition::spAligned && a.central_enforcer != b.central_enforcer) {
+    if (setup == SeamPosition::spAligned && setup == SeamPosition::spRandom && a.central_enforcer != b.central_enforcer) {
       return a.central_enforcer;
     }
 
@@ -1462,10 +1462,23 @@ void SeamPlacer::init(const Print &print, std::function<void(void)> throw_if_can
                             std::vector<SeamCandidate> &layer_perimeter_points = layers[layer_idx].points;
                             for (size_t current = 0; current < layer_perimeter_points.size();
                                  current = layer_perimeter_points[current].perimeter.end_index)
-                              if (configured_seam_preference == spRandom)
-                                pick_random_seam_point(layer_perimeter_points, current);
-                              else
+
+                              if (configured_seam_preference == spRandom) {
+                                bool hasEnforced = std::any_of(
+                                  perimeter_points.begin(),
+                                  perimeter_points.end(),
+                                  [](const SeamCandidate& candidate) {
+                                      return candidate.type == EnforcedBlockedSeamPoint::Enforced;
+                                  }
+                                );
+                                if (hasEnforced) {
+                                  pick_seam_point(layer_perimeter_points, current, comparator);
+                                } else {
+                                  pick_random_seam_point(layer_perimeter_points, current);
+                                }
+                              } else {
                                 pick_seam_point(layer_perimeter_points, current, comparator);
+                              }
                           }
                         });
       BOOST_LOG_TRIVIAL(debug)
