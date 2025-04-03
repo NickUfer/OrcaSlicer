@@ -790,7 +790,7 @@ struct SeamComparator {
   // Also used by the random seam generator.
   bool is_first_not_much_worse(const SeamCandidate &a, const SeamCandidate &b) const {
     // Blockers/Enforcers discrimination, top priority
-    if (setup == SeamPosition::spAligned && a.central_enforcer != b.central_enforcer) {
+    if (setup == SeamPosition::spAligned || setup == SeamPosition::spRandom && a.central_enforcer != b.central_enforcer) {
       // Prefer centers of enforcers.
       return a.central_enforcer;
     }
